@@ -1,3 +1,4 @@
+{
 disko.devices = {
   disk.main = {
     type = "disk";
@@ -32,12 +33,12 @@ disko.devices = {
               home = {
                 mountpoint = "/home";
                 mountOptions = [ "compress=zstd" "noatime" ];
-              };
-            };
-          };
-        };
-      };
-    };
-  };
-};
-
+               };
+             };
+           };
+         };
+       };
+     };
+   };
+ };
+}
