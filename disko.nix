@@ -1,15 +1,17 @@
 # disko.nix
-{ disks ? [ "/dev/nvme0n1" ] }:
+{ pkgs, lib, ... }:
+
 {
+  disko.enableConfig = true;
+
   disko.devices = {
-    main = {
-      device = disks[0];
+    disk.main = {
       type = "disk";
+      device = "/dev/nvme0n1";
       content = {
-        type = "table";
-        format = "gpt";
+        type = "gpt";
         partitions = {
-          ESP = {
+          esp = {
             size = "512M";
             type = "EF00";
             content = {
@@ -18,17 +20,24 @@
               mountpoint = "/boot";
             };
           };
-          BTRFS = {
+
+          btrfs = {
             size = "100%";
             content = {
               type = "filesystem";
               format = "btrfs";
               mountpoint = null;
               subvolumes = {
-                "root" = { mountpoint = "/"; };
-                "persist" = { mountpoint = "/persist"; };
-                "nix" = { mountpoint = "/nix"; };
-                "home" = { mountpoint = "/home"; };
+                root = { mountpoint = "/"; };
+                persist = { mountpoint = "/persist"; };
+                nix = {
+                  mountpoint = "/nix";
+                  mountOptions = [ "compress=zstd" "noatime" ];
+                };
+                home = {
+                  mountpoint = "/home";
+                  mountOptions = [ "compress=zstd" "noatime" ];
+                };
               };
             };
           };
@@ -36,6 +45,5 @@
       };
     };
   };
-
-  disko.enableConfig = true;
 }
+
