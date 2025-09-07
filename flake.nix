@@ -19,23 +19,32 @@
       home-manager,
       ...
     }:
+    let
+      system = "x86_64-linux";
+
+      # Global specialArgs shared by nixosConfigurations and homeConfigurations
+      specialArgs = {
+        inherit inputs;
+        username = "Brak";
+        hostname = "I-use-nix-btw";
+      };
+
+      pkgs = import nixpkgs {
+        inherit system;
+        overlays = [ inputs.wayland.overlay ];
+      };
+    in
     {
       nixosConfigurations = {
         mySystem = nixpkgs.lib.nixosSystem {
-          system = "x86_64-linux";
-
-          specialArgs = {
-            inherit inputs;
-            username = "Brak";
-            hostname = "I-use-nix-btw";
-          };
+          inherit system specialArgs;
 
           modules = [
             ./configuration.nix
             ./hardware-configuration.nix
 
             inputs.disko.nixosModules.disko
-            ./disko-config.nix
+            ./disko.nix
             inputs.impermanence.nixosModules.impermanence
 
             ./System/stylix.nix
@@ -43,15 +52,13 @@
             inputs.nvf.nixosModules.nvf
           ];
 
-          pkgs = import nixpkgs {
-            system = "x86_64-linux";
-            overlays = [ wayland.overlay ];
-          };
+          inherit pkgs;
         };
       };
+
       homeConfigurations = {
-        Brak = home-manager.lib.homeManagerConfiguration {
-          pkgs = import nixpkgs { system = "x86_64-linux"; };
+        ${specialArgs.username} = home-manager.lib.homeManagerConfiguration {
+          inherit pkgs specialArgs;
           modules = [
             ./Home/stylix.nix
             ./Home/nvf.nix
