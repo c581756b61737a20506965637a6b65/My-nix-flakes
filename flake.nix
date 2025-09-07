@@ -11,6 +11,8 @@
     stylix.url = "github:nix-community/stylix";
     nvf.url = "github:NotAShelf/nvf";
     wayland.url = "github:nix-community/nixpkgs-wayland";
+
+    nh.url = "github:nix-community/nh";
   };
 
   outputs =
