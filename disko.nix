@@ -1,4 +1,3 @@
-{
 disko.devices = {
   disk.main = {
     type = "disk";
@@ -15,30 +14,29 @@ disko.devices = {
             mountpoint = "/boot";
           };
         };
-
         btrfs = {
           size = "100%";
           content = {
-            type = "filesystem";
-            format = "btrfs";
-            label = "btrfs";  # <- add label here
+            type = "btrfs";
+            extraArgs = [ "-L" "nixos" ];
             mountpoint = null;
             subvolumes = {
-              root = { mountpoint = "/"; };
-              persist = { mountpoint = "/persist"; };
-              nix = {
+              "/persist" = {
+                mountpoint = "/persist";
+                mountOptions = [ "compress=zstd" "noatime" ];
+              };
+              "/nix" = {
                 mountpoint = "/nix";
                 mountOptions = [ "compress=zstd" "noatime" ];
               };
-              home = {
+              "/home" = {
                 mountpoint = "/home";
                 mountOptions = [ "compress=zstd" "noatime" ];
-               };
-             };
-           };
-         };
-       };
-     };
-   };
- };
-}
+              };
+            };
+          };
+        };
+      };
+    };
+  };
+};
