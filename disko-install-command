@@ -1,0 +1,4 @@
+sudo nix run 'github:nix-community/disko#disko-install/latest' \
+  -- --flake .#I-use-nix-btw \
+     --disk main /dev/nvme0n1 \
+     --write-efi-boot-entries
