@@ -57,6 +57,7 @@
         "${specialArgs.username}" = home-manager.lib.homeManagerConfiguration {
           inherit pkgs specialArgs;
           modules = [
+            ./Home/impermanence.nix
             ./Home/stylix.nix
             ./Home/nvf.nix
             ./Home/hyperland.nix
