@@ -9,60 +9,55 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  # Swapfile for hibernation
-  swapDevices = [
-    {
-      device = "/var/lib/swapfile";
-      size = 16 * 1024; # 16 GiB
-    }
+  # Secure and boot-critical mount for /persist
+  fileSystems."/persist" = {
+    device = "zroot/local/persist";
+    fsType = "zfs";
+    neededForBoot = true;
+    options = [ "noatime" "nodev" "nosuid" ];
+  };
+
+  # Impermanence: persist only essential state
+  environment.persistence."/persist" = {
+    directories = [
+      "/etc/nixos"        # Your system config
+      "/var/lib"          # Application and system state
+      "/var/log"          # Logs
+    ];
+    files = [
+      "/etc/machine-id"   # Required for networking and D-Bus
+      "/etc/ssh/ssh_host_ed25519_key"
+      "/etc/ssh/ssh_host_ed25519_key.pub"
+    ];
+  };
+
+  # Recreate non-persistent dirs on each boot
+  systemd.tmpfiles.rules = [
+    "d /var/lib 0755 root root - -"
+    "d /var/log 0755 root root - -"
   ];
 
-  # Mounting Btrfs subvolumes created by Disko via label "nixos"
-  fileSystems."/" = {
-    device = "/dev/disk/by-label/nixos";
-    fsType = "btrfs";
-    options = [ "subvol=/" "compress=zstd" "noatime" ];
-  };
-  fileSystems."/persist" = {
-    device = "/dev/disk/by-label/nixos";
-    fsType = "btrfs";
-    options = [ "subvol=persist" "compress=zstd" "noatime" ];
-  };
-  fileSystems."/nix" = {
-    device = "/dev/disk/by-label/nixos";
-    fsType = "btrfs";
-    options = [ "subvol=nix" "compress=zstd" "noatime" ];
-  };
-  fileSystems."/home" = {
-    device = "/dev/disk/by-label/nixos";
-    fsType = "btrfs";
-    options = [ "subvol=home" "compress=zstd" "noatime" ];
+  # Optional: auto-login (for testing) or hostname
+  networking.hostName = specialArgs.hostname;
+
+  # Standard NixOS stuff
+  time.timeZone = "DK";
+
+  services.openssh.enable = true;
+
+  users.users.Brak = {
+    isNormalUser = true;
+    extraGroups = [ "wheel" "networkmanager" ];
+    shell = pkgs.zsh;
   };
 
-  # Impermanence persistence
-  environment.persistence."/persist" = {
-    neededForBoot = true;
-    directories = [ "/etc/nixos" ];
-    files = [ "/etc/machine-id" ];
-  };
-  environment.persistence."/home" = {
-    neededForBoot = true;
-    users = {
-      "${specialArgs.username}" = {
-        directories = [ "Documents" "Games" "Programming" "Study" ];
-      };
-    };
-  };
+  programs.zsh.enable = true;
 
-  # Hibernation setup
-  boot.initrd.kernelModules = [ "resume" ];
-  boot.kernelParams = [ "resume=/var/lib/swapfile" ];
-  systemd.sleep.extraConfig = ''
-    AllowSuspend=yes
-    AllowHibernation=yes
-    AllowSuspendThenHibernate=yes
-  '';
+  # Enable impermanence-friendly options
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
 
-  # Disable X server (Wayland only)
-  services.xserver.enable = false;
+  # Use ZFS native support (in case it's not already)
+  boot.supportedFilesystems = [ "zfs" ];
+  boot.zfs.enableUnstable = true;  # Needed for newer features sometimes
 }
