@@ -56,4 +56,13 @@
   # Use ZFS native support (in case it's not already)
   boot.supportedFilesystems = [ "zfs" ];
   boot.zfs.enableUnstable = true;  # Needed for newer features sometimes
+
+  services.zfs.trim.enable = true;
+  services.zfs.trim.interval = "weekly";  # or "daily"
+
+  programs.nh = {
+  enable = true;
+  flake = "/etc/nixos";  # or wherever your flake is
+};
+
 }
