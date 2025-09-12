@@ -1,4 +1,5 @@
-sudo nix run 'github:nix-community/disko#disko-install/latest' \
-  -- --flake .#I-use-nix-btw \
-     --disk main /dev/nvme0n1 \
-     --write-efi-boot-entries
+nix run github:nix-community/disko -- --mode disko ./disko.nix
+zfs mount -a
+mount -t vfat /dev/disk/by-partlabel/ESP /mnt/boot
+# Or use `/dev/disk/by-uuid/...` depending on your naming
+# Check: Run lsblk -f or findmnt to verify everything is mounted under /mnt.
