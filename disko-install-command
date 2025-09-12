@@ -1,19 +1,39 @@
-# 1. Boot into NixOS live ISO
-# 2. Set up networking
-ping nixos.org
+# NixOS Install Steps with Flakes, Disko, ZFS, Impermanence
 
-# 3. Run disko to format the drive
-nix run github:nix-community/disko -- --mode disko ./disko.nix
+# 1. Connect to the Internet
+ping -c3 nixos.org
+nmtui  # if not connected
 
-# 4. Mount ZFS datasets
-zpool import -f zroot
-zfs mount -a
+# 2. Clone your config repo (GitHub) 
+git clone https://github.com/c581756b61737a20506965637a6b65/My-nix-flakes /mnt/config
+cd /mnt/config
 
-# 5. Mount the EFI partition
-mount /dev/disk/by-partlabel/ESP /mnt/boot
+# 3. (Optional) Wipe disk - WARNING: This erases the disk
+wipefs -a /dev/nvme0n1
 
-# 6. Run nixos-install with flakes
-nixos-install --flake .#I-use-nix-btw
+# 4. Run Disko to partition, format, and mount
+nix-shell -p disko
+disko --mode disko ./disko.nix
 
-# 7. Reboot
+# 5. Link or copy flake to /mnt/etc/nixos
+mkdir -p /mnt/etc
+ln -s /mnt/config /mnt/etc/nixos
+
+# OR copy:
+# cp -r /mnt/config /mnt/etc/nixos
+
+# 6. Confirm flake exists
+ls /mnt/etc/nixos/flake.nix
+
+# 7. Install NixOS using flake
+nix-shell -p nixFlakes
+nixos-install --flake /mnt/etc/nixos#I-use-nix-btw
+
+# 8. (Optional) Set root password
+nixos-enter
+passwd
+exit
+
+# 9. Reboot into new system
 reboot
+
