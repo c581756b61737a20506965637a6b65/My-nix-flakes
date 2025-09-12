@@ -1,5 +1,19 @@
+# 1. Boot into NixOS live ISO
+# 2. Set up networking
+ping nixos.org
+
+# 3. Run disko to format the drive
 nix run github:nix-community/disko -- --mode disko ./disko.nix
+
+# 4. Mount ZFS datasets
+zpool import -f zroot
 zfs mount -a
-mount -t vfat /dev/disk/by-partlabel/ESP /mnt/boot
-# Or use `/dev/disk/by-uuid/...` depending on your naming
-# Check: Run lsblk -f or findmnt to verify everything is mounted under /mnt.
+
+# 5. Mount the EFI partition
+mount /dev/disk/by-partlabel/ESP /mnt/boot
+
+# 6. Run nixos-install with flakes
+nixos-install --flake .#I-use-nix-btw
+
+# 7. Reboot
+reboot
