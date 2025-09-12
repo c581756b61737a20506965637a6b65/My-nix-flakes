@@ -45,17 +45,13 @@
 
   services.openssh.enable = true;
 
-  users.users.Brak = {
+  users.users.${specialArgs.username} = {
     isNormalUser = true;
     extraGroups = [ "wheel" "networkmanager" ];
     shell = pkgs.zsh;
   };
 
   programs.zsh.enable = true;
-
-  # Enable impermanence-friendly options
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
 
   # Use ZFS native support (in case it's not already)
   boot.supportedFilesystems = [ "zfs" ];
